@@ -34,7 +34,7 @@ void loop() {
 }
 
 void puckLoop() {
-  if (buttonSingleClicked()) {
+  if (buttonSingleClicked() && isAlone()) {
     team++;
     if (team == 7) {
       team = 1;
@@ -79,7 +79,11 @@ void fieldLoop() {
     team = RESET;
   }
 
+  byte teamCount[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
   FOREACH_FACE(f) {
+
+    //first, run signal loops
     switch (comState[f]) {
       case INERT:
         inertFaceLoop(f);
@@ -94,6 +98,30 @@ void fieldLoop() {
         laserFaceLoop(f);
         break;
     }
+
+    //second, let's do the game of life stuff
+    if (!isValueReceivedOnFaceExpired(f)) { //neighbor!
+      byte neighborData = getLastValueReceivedOnFace(f);
+      if (getIsPuck(neighborData) == false) {
+        //log their color
+        teamCount[getTeam(neighborData)]++;
+      }
+    }
+  }
+
+  //now we'll resolve game of life stuff
+  //search for 3s within the team count
+  byte threesFound = 0;
+  byte threesTeam = 0;
+  FOREACH_FACE(f) {
+    if (teamCount[f + 1] > 2) {
+      threesFound++;
+      threesTeam = f + 1;
+    }
+  }
+
+  if (threesFound == 1) {
+    team = threesTeam;
   }
 }
 
