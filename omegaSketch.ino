@@ -1,4 +1,4 @@
-Color teamColors[8] = {WHITE, RED, ORANGE, YELLOW, GREEN, CYAN, MAGENTA, OFF};
+byte teamHues[8] = {0, 0, 21, 42, 85, 110, 170, 210};
 
 #define RESET 7
 #define FIELD 0
@@ -9,6 +9,8 @@ bool isPuck = false;
 
 enum comStates {INERT, GO, RESOLVE, LASER};
 byte comState[6] = {INERT, INERT, INERT, INERT, INERT, INERT};
+
+Timer swarmTimer;
 
 void setup() {
   // put your setup code here, to run once:
@@ -30,8 +32,12 @@ void loop() {
     isPuck = false;
   }
 
-  //temp visuals
-  tempDisplay();
+  //visuals
+  if (isPuck) {
+    puckDisplay();
+  } else {
+    fieldDisplay();
+  }
 
   //begin communication
   FOREACH_FACE(f) {
@@ -129,8 +135,11 @@ void fieldLoop() {
       }
     }
 
-    if (threesFound == 1) {
+    if (threesFound == 1 && threesTeam != team) {//this is the special swarm transition
       team = threesTeam;
+      if (swarmTimer.isExpired()) {
+        swarmTimer.set(1000);
+      }
     }
   }
 }
@@ -205,40 +214,35 @@ void laserFaceLoop(byte face) {
   }
 }
 
-void tempDisplay() {
+void fieldDisplay() {
+
+  //determine swarm saturation
+  byte sat = 255;
+  if (swarmTimer.isExpired() == false) {
+    sat = 255 - map(swarmTimer.getRemaining(), 0, 1000, 0, 255);
+  }
+
   FOREACH_FACE(f) {
     switch (comState[f]) {
       case INERT:
-        setColorOnFace(dim(teamColors[team], 155), f);
+        if (team == FIELD) {
+          setColorOnFace(dim(WHITE, 155), f);
+        } else {
+          setColorOnFace(makeColorHSB(teamHues[team], sat, 255), f);
+        }
         break;
       case GO:
-        setColorOnFace(WHITE, f);
-        break;
       case RESOLVE:
-        setColorOnFace(dim(teamColors[team], 255), f);
-        break;
-      case LASER:
-        setColorOnFace(dim(teamColors[team], millis() % 255), f);
+        setColorOnFace(WHITE, f);
         break;
     }
   }
 
 }
 
-//void puckDisplay() {
-//  setColor(OFF);
-//  setColorOnFace(makeColorHSB(hues[team], 255, 255), 0);
-//  setColorOnFace(makeColorHSB(hues[team], 255, 255), 3);
-//}
-//
-//void fieldDisplay() {
-//  setColor(dim(WHITE, 100));
-//}
-//
-//void beamDisplay(byte neighborTeam, int f) {
-//  setColorOnFace(makeColorHSB(hues[neighborTeam], 255, 255), f);
-//  setColorOnFace(makeColorHSB(hues[neighborTeam], 255, 255), (f + 3) % 6);
-//}
+void puckDisplay() {
+  setColor(makeColorHSB(teamHues[team], (millis() / 3) % 255, 255));
+}
 
 bool getIsPuck(byte val) {
   return (val >> 5);
