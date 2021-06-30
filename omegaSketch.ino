@@ -109,19 +109,21 @@ void fieldLoop() {
     }
   }
 
-  //now we'll resolve game of life stuff
-  //search for 3s within the team count
-  byte threesFound = 0;
-  byte threesTeam = 0;
-  FOREACH_FACE(f) {
-    if (teamCount[f + 1] > 5) {
-      threesFound++;
-      threesTeam = f + 1;
+  if (team != RESET) {
+    //now we'll resolve game of life stuff
+    //search for 3s within the team count
+    byte threesFound = 0;
+    byte threesTeam = 0;
+    FOREACH_FACE(f) {
+      if (teamCount[f + 1] > 5) {
+        threesFound++;
+        threesTeam = f + 1;
+      }
     }
-  }
 
-  if (threesFound == 1) {
-    team = threesTeam;
+    if (threesFound == 1) {
+      team = threesTeam;
+    }
   }
 }
 
