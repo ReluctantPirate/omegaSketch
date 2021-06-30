@@ -23,6 +23,13 @@ void loop() {
     fieldLoop();
   }
 
+  //listen for reset
+  if (buttonMultiClicked() && buttonClickCount > 2) {
+    setFullComState(GO);
+    team = RESET;
+    isPuck = false;
+  }
+
   //temp visuals
   tempDisplay();
 
@@ -74,10 +81,7 @@ void fieldLoop() {
     comState[3] = LASER;
   }
 
-  if (buttonMultiClicked() && buttonClickCount > 2) {
-    setFullComState(GO);
-    team = RESET;
-  }
+
 
   byte teamCount[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -115,7 +119,7 @@ void fieldLoop() {
     byte threesFound = 0;
     byte threesTeam = 0;
     FOREACH_FACE(f) {
-      if (teamCount[f + 1] > 5) {
+      if (teamCount[f + 1] > 4) {
         threesFound++;
         threesTeam = f + 1;
       }
@@ -201,13 +205,13 @@ void tempDisplay() {
   FOREACH_FACE(f) {
     switch (comState[f]) {
       case INERT:
-        setColorOnFace(dim(teamColors[team], 50), f);
+        setColorOnFace(dim(teamColors[team], 155), f);
         break;
       case GO:
-        setColorOnFace(dim(teamColors[team], 255), f);
+        setColorOnFace(WHITE, f);
         break;
       case RESOLVE:
-        setColorOnFace(dim(teamColors[team], 100), f);
+        setColorOnFace(dim(teamColors[team], 255), f);
         break;
       case LASER:
         setColorOnFace(dim(teamColors[team], millis() % 255), f);
@@ -231,6 +235,7 @@ void tempDisplay() {
 //  setColorOnFace(makeColorHSB(hues[neighborTeam], 255, 255), f);
 //  setColorOnFace(makeColorHSB(hues[neighborTeam], 255, 255), (f + 3) % 6);
 //}
+
 bool getIsPuck(byte val) {
   return (val >> 5);
 }
