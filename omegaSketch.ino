@@ -50,7 +50,11 @@ void puckLoop() {
 
   if (isAlone()) {
     comState[0] = LASER;
+    comState[1] = LASER;
+    comState[2] = LASER;
     comState[3] = LASER;
+    comState[4] = LASER;
+    comState[5] = LASER;
   }
 
   FOREACH_FACE(f) {
