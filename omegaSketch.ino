@@ -114,7 +114,7 @@ void fieldLoop() {
   byte threesFound = 0;
   byte threesTeam = 0;
   FOREACH_FACE(f) {
-    if (teamCount[f + 1] > 2) {
+    if (teamCount[f + 1] > 5) {
       threesFound++;
       threesTeam = f + 1;
     }
